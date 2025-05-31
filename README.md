@@ -22,7 +22,7 @@ A backend RESTful API for a secure digital wallet system with features like auth
 ## 🛠️ How to Run Locally
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/digital-wallet-system.git
+git clone https://github.com/divyachawla11/Digital-Wallet.git
 cd digital-wallet-system
 npm install
 npm run dev

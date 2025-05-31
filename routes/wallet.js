@@ -2,12 +2,12 @@ const express = require("express");
 const authMiddleware = require("../middleware/auth");
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
-const checkForFraud = require("../utils/fraudCheck");
+const { checkForFraud, sendEmailAlert } = require("../utils/fraudCheck");
 
 const router = express.Router();
 router.use(authMiddleware);
 
-// Deposit funds
+// Deposit funds (no fraud check)
 router.post("/deposit", async (req, res) => {
   const { amount, currency } = req.body;
   if (!currency) return res.status(400).json({ message: "Currency is required" });
@@ -21,14 +21,12 @@ router.post("/deposit", async (req, res) => {
     user.balance.set(currency, currentBalance + amount);
     await user.save();
 
-    const flagged = await checkForFraud(user._id, amount);
-
     const transaction = new Transaction({
       user: user._id,
       type: "deposit",
       amount,
       currency,
-      flagged,
+      flagged: false, 
       isDeleted: false,
     });
     await transaction.save();
@@ -39,7 +37,7 @@ router.post("/deposit", async (req, res) => {
   }
 });
 
-// Withdraw funds
+// Withdraw funds (check for large amount)
 router.post("/withdraw", async (req, res) => {
   const { amount, currency } = req.body;
   if (!currency) return res.status(400).json({ message: "Currency is required" });
@@ -55,7 +53,11 @@ router.post("/withdraw", async (req, res) => {
     user.balance.set(currency, currentBalance - amount);
     await user.save();
 
-    const flagged = await checkForFraud(user._id, amount);
+    const flagged = await checkForFraud(user._id, amount, "withdraw");
+
+    if (flagged) {
+      await sendEmailAlert(user.email, amount, "withdraw");
+    }
 
     const transaction = new Transaction({
       user: user._id,
@@ -73,7 +75,7 @@ router.post("/withdraw", async (req, res) => {
   }
 });
 
-// Transfer funds
+// Transfer funds (check for high frequency transfers only)
 router.post("/transfer", async (req, res) => {
   const { amount, recipientEmail, currency } = req.body;
   if (!recipientEmail || !currency) return res.status(400).json({ message: "Recipient email and currency are required" });
@@ -96,8 +98,11 @@ router.post("/transfer", async (req, res) => {
     await sender.save();
     await recipient.save();
 
-    const flaggedSender = await checkForFraud(sender._id, amount);
-    const flaggedRecipient = await checkForFraud(recipient._id, amount);
+    const flaggedSender = await checkForFraud(sender._id, amount, "transfer");
+
+    if (flaggedSender) {
+      await sendEmailAlert(sender.email, amount, "transfer");
+    }
 
     const senderTransaction = new Transaction({
       user: sender._id,
@@ -116,7 +121,7 @@ router.post("/transfer", async (req, res) => {
       amount,
       currency,
       recipient: sender._id,
-      flagged: flaggedRecipient,
+      flagged: false, 
       isDeleted: false,
     });
     await recipientTransaction.save();
@@ -137,7 +142,7 @@ router.get("/transactions", async (req, res) => {
   }
 });
 
-// View flagged transactions (only for the logged-in user)
+// View flagged transactions
 router.get("/flagged", async (req, res) => {
   try {
     const flaggedTransactions = await Transaction.find({

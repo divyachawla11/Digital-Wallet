@@ -37,3 +37,19 @@ npm install
 # Set up .env file 
 # Start the server (nodemon)
 npm run dev
+
+**🧪 API Documentation (Postman)**
+You can test all endpoints using our Postman Collection.
+
+📁 File: Digital Wallet API.postman_collection.json
+
+**📊 Admin APIs**
+Endpoint	Method	Description
+/admin/flagged	GET	View all flagged transactions
+/admin/stats/summary	GET	View total balances across users
+/admin/stats/top	GET	View top 5 users by balance
+
+**🧹 Bonus Features**
+✅ Daily fraud scan (runs every midnight)
+✅ Soft deletion (mark users/transactions as deleted)
+🟡 Email alerts (console-logged for now)

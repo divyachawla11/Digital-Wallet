@@ -2,7 +2,7 @@
 
 A backend RESTful API for a secure digital wallet system with features like authentication, transaction management, and rule-based fraud detection.
 
-## 🚀 Features
+##🚀 Features
 
 - ✅ User Registration and Login (JWT-based Authentication)
 - ✅ Wallet Operations: Deposit, Withdraw, Transfer
@@ -27,7 +27,6 @@ A backend RESTful API for a secure digital wallet system with features like auth
 
 ## 📦 How to Run Locally
 
-```bash
 # Clone the repo
 git clone https://github.com/divyachawla11/Digital-Wallet.git
 # Navigate to the project folder
@@ -53,3 +52,8 @@ Endpoint	Method	Description
 ✅ Daily fraud scan (runs every midnight)
 ✅ Soft deletion (mark users/transactions as deleted)
 🟡 Email alerts (console-logged for now)
+
+## 📽️ Demo video
+
+[Click here to watch the demo video](https://drive.google.com/file/d/1PRtH7D-_5JSrwC4E3RehOYsKuaDE0y6M/view?usp=sharing)
+
